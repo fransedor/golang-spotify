@@ -14,7 +14,7 @@ func Login(c *gin.Context) {
 	redirect_uri := os.Getenv("REDIRECT_URI")
 
 	state := helper.GenerateRandomString(16)
-	scope := "user-read-private user-read-email"
+	scope := "user-read-private user-read-email user-read-playback-state"
 
 	params := url.Values{}
 	params.Add("response_type", "code")

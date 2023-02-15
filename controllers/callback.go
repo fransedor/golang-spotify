@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -66,7 +67,9 @@ func Callback(access_token *string, refresh_token *string) gin.HandlerFunc {
 			log.Fatal(err)
 		}
 		*access_token = accessTokenResponse.Access_token
+		fmt.Println("Access Token: ", *access_token)
 		*refresh_token = accessTokenResponse.Refresh_token
+		fmt.Println("Refresh Token: ", *refresh_token)
 	}
 
 }

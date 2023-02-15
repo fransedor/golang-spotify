@@ -22,5 +22,7 @@ func main() {
 	router.GET("/login", controllers.Login)
 	router.GET("/callback", controllers.Callback(&access_token, &refresh_token))
 	router.GET("/tracks", controllers.GetTracks(&access_token, &refresh_token))
+	router.GET("/profile", controllers.GetProfile)
+	router.GET("/devices", controllers.GetAvailableDevices)
 	router.Run("localhost:8080")
 }
