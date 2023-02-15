@@ -1,13 +1,11 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"os"
 
+	helper "github.com/fransedor/golang-spotify/helpers"
 	"github.com/gin-gonic/gin"
 )
 
@@ -47,28 +45,19 @@ type Profile struct {
 }
 
 func GetProfile(c *gin.Context) {
-	client := &http.Client{}
 	authHeader := c.Request.Header.Get("Authorization")
 
 	spotifyURL := os.Getenv("SPOTIFY_URL")
 
-	req, _ := http.NewRequest(http.MethodGet, spotifyURL+"/me", nil)
-	req.Header.Add("Authorization", authHeader)
-	req.Header.Add("Content-Type", "application/json")
+	req, err := helper.CreateHTTPRequestWithHeader("GET", spotifyURL+"/me", nil, authHeader[7:])
 
-	response, err := client.Do(req)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer response.Body.Close()
-
-	bodyBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	var profile Profile
-	err = json.Unmarshal(bodyBytes, &profile)
+	_, err = helper.GetHTTPResponse(req, &profile)
+
 	if err != nil {
 		log.Fatal(err)
 	}

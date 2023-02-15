@@ -1,13 +1,11 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"os"
 
+	helper "github.com/fransedor/golang-spotify/helpers"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,27 +24,17 @@ type APIReponse struct {
 }
 
 func GetAvailableDevices(c *gin.Context) {
-	client := &http.Client{}
 	authHeader := c.Request.Header.Get("Authorization")
 
 	spotifyURL := os.Getenv("SPOTIFY_URL")
 
-	req, _ := http.NewRequest(http.MethodGet, spotifyURL+"/me/player/devices", nil)
-	req.Header.Add("Authorization", authHeader)
-	req.Header.Add("Content-Type", "application/json")
-
-	response, err := client.Do(req)
+	req, err := helper.CreateHTTPRequestWithHeader("GET", spotifyURL+"/me/player/devices", nil, authHeader[7:])
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer response.Body.Close()
 
-	bodyBytes, err := io.ReadAll(response.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
 	var devices APIReponse
-	err = json.Unmarshal(bodyBytes, &devices)
+	_, err = helper.GetHTTPResponse(req, &devices)
 	if err != nil {
 		log.Fatal(err)
 	}
