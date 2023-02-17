@@ -25,5 +25,6 @@ func main() {
 	router.GET("/profile", controllers.GetProfile)
 	router.GET("/devices", controllers.GetAvailableDevices)
 	router.PUT("/playback/start", controllers.StartPlayback)
+	router.GET("/playback/current", controllers.GetCurrentlyPlaying)
 	router.Run("localhost:8080")
 }
