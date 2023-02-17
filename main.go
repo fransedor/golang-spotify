@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	controllers "github.com/fransedor/golang-spotify/controllers"
+	"github.com/fransedor/golang-spotify/middlewares"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -24,7 +25,7 @@ func main() {
 	router.GET("/tracks", controllers.GetTracks(&access_token, &refresh_token))
 	router.GET("/profile", controllers.GetProfile)
 	router.GET("/devices", controllers.GetAvailableDevices)
-	router.PUT("/playback/start", controllers.StartPlayback)
-	router.GET("/playback/current", controllers.GetCurrentlyPlaying)
+	router.PUT("/playback/start", middlewares.GetActiveDevice, controllers.StartPlayback)
+	router.GET("/playback/current", middlewares.GetActiveDevice, controllers.GetCurrentlyPlaying)
 	router.Run("localhost:8080")
 }
