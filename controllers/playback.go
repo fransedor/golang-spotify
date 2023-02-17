@@ -10,10 +10,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func StartPlayback(c *gin.Context) {
+func StartOrPausePlayback(c *gin.Context) {
 	client := &http.Client{}
 	authHeader := c.Request.Header.Get("Authorization")
 	spotifyURL := os.Getenv("SPOTIFY_URL")
+
+	currentlyPlaying := GetPlaybackState(c)
+	if currentlyPlaying.Is_playing {
+		spotifyURL = spotifyURL + "/me/player/play"
+	} else {
+		spotifyURL = spotifyURL + "me/player/pause"
+	}
 	req, err := helper.CreateHTTPRequestWithHeader("PUT", spotifyURL+"/me/player/play", nil, authHeader[7:])
 	if err != nil {
 		log.Fatal(err)
@@ -29,6 +36,21 @@ func StartPlayback(c *gin.Context) {
 	responseObj["message"] = "started playback"
 
 	c.IndentedJSON(200, responseObj)
+}
+
+func GetPlaybackState(c *gin.Context) models.GetCurrentlyPlayingResponse {
+	authHeader := c.Request.Header.Get("Authorization")
+	spotifyURL := os.Getenv("SPOTIFY_URL")
+	req, err := helper.CreateHTTPRequestWithHeader("GET", spotifyURL+"/me/player", nil, authHeader[7:])
+	if err != nil {
+		log.Fatal(err)
+	}
+	var currentTrack models.GetCurrentlyPlayingResponse
+	_, err = helper.GetHTTPResponse(req, &currentTrack)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return currentTrack
 }
 
 func GetCurrentlyPlaying(c *gin.Context) {
