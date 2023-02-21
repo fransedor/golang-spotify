@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 
+	helper "github.com/fransedor/golang-spotify/helpers"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,6 +29,10 @@ type GetAccessTokenResponseBody struct {
 	Refresh_token string `json:"refresh_token"`
 }
 
+type RequestBody struct {
+	Code string
+}
+
 func Callback(access_token *string, refresh_token *string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		client := &http.Client{}
@@ -41,6 +46,7 @@ func Callback(access_token *string, refresh_token *string) gin.HandlerFunc {
 
 		authHeaderStr := client_id + ":" + client_secret
 		encodedAuth := base64.StdEncoding.EncodeToString([]byte(authHeaderStr))
+		fmt.Println("Encoded Auth: ", encodedAuth)
 
 		spotifyTokenRequestBody := url.Values{}
 		spotifyTokenRequestBody.Set("code", code)
@@ -66,10 +72,16 @@ func Callback(access_token *string, refresh_token *string) gin.HandlerFunc {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		*access_token = accessTokenResponse.Access_token
 		fmt.Println("Access Token: ", *access_token)
 		*refresh_token = accessTokenResponse.Refresh_token
 		fmt.Println("Refresh Token: ", *refresh_token)
+
+		responseData := make(map[string]string)
+		responseData["access_token"] = accessTokenResponse.Access_token
+		responseData["refresh_token"] = accessTokenResponse.Refresh_token
+		c.IndentedJSON(200, helper.CreateSuccessResponse(responseData))
 	}
 
 }

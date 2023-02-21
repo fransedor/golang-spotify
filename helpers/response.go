@@ -26,3 +26,11 @@ func GetHTTPResponse[T any](req *http.Request, jsonResponse *T) (status string, 
 	return "success", nil
 
 }
+
+func CreateSuccessResponse(data any) (successResponse map[string]any) {
+	response := make(map[string]any)
+	response["status"] = 200
+	response["message"] = "success"
+	response["data"] = data
+	return response
+}

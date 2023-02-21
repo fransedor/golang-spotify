@@ -5,6 +5,7 @@ import (
 
 	controllers "github.com/fransedor/golang-spotify/controllers"
 	"github.com/fransedor/golang-spotify/middlewares"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -15,6 +16,14 @@ var refresh_token string = ""
 func main() {
 	godotenv.Load()
 	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "https://github.com"
+		},
+	}))
 	router.GET("/", func(c *gin.Context) {
 		c.IndentedJSON(http.StatusOK, gin.H{
 			"message": "Hello",
