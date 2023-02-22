@@ -2,52 +2,66 @@ package helper
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 )
 
 var client = &http.Client{}
 
-func GetHTTPResponse(req *http.Request, jsonResponse interface{}) (status string, error error) {
+func GetHTTPResponse(req *http.Request, jsonResponse interface{}) (status string, newResponse CustomResponse) {
 	fmt.Println("Running GetHTTPResponse")
 	response, err := client.Do(req)
 	if err != nil {
-		return "fail", err
+		return "fail", CreateErrorResponse(500, "Request failed")
 	}
 	defer response.Body.Close()
 
 	fmt.Println("response", response.StatusCode)
-	if response.StatusCode > 200 {
-		return "fail", err
+
+	if response.StatusCode == 401 {
+		err = errors.New("expired token")
+		return "fail", CreateErrorResponse(401, "Expired token")
 	}
+	if response.StatusCode > 200 {
+		err = errors.New("Not OK")
+		return "fail", CreateErrorResponse(500, "Not OK response")
+	}
+
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
-		log.Fatal("readAll err ", err)
-		return "fail", err
+		fmt.Println("readAll err ", err)
+		return "fail", CreateErrorResponse(500, "Failed to read response")
 	}
-	fmt.Println("jsonResponse ", jsonResponse)
+
 	err = json.Unmarshal(bytes, jsonResponse)
 	if err != nil {
-		log.Fatal("unmarshal err ", err)
-		return "fail", err
+		fmt.Println("unmarshal err ", err)
+		return "fail", CreateErrorResponse(500, "Failed to unmarshal response")
 	}
-	return "success", nil
+	return "success", CreateSuccessResponse(nil)
 
 }
 
-func CreateSuccessResponse(data any) (successResponse map[string]any) {
-	response := make(map[string]any)
-	response["status"] = 200
-	response["message"] = "success"
-	response["data"] = data
+type CustomResponse struct {
+	Status  int
+	Message string
+	Data    any
+}
+
+func CreateSuccessResponse(data any) (successResponse CustomResponse) {
+	var response CustomResponse
+	response.Status = 200
+	response.Message = "success"
+	response.Data = data
 	return response
 }
 
-func CreateErrorResponse(statusCode int, message string) (errorResponse map[string]any) {
-	response := make(map[string]any)
-	response["status"] = statusCode
-	response["message"] = message
+func CreateErrorResponse(statusCode int, message string) (errorResponse CustomResponse) {
+	var response CustomResponse
+	response.Status = statusCode
+	response.Message = message
+	response.Data = nil
 	return response
 }

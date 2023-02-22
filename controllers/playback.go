@@ -49,9 +49,9 @@ func GetPlaybackState(c *gin.Context) models.GetCurrentlyPlayingResponse {
 		log.Fatal(err)
 	}
 	var currentTrack models.GetCurrentlyPlayingResponse
-	_, err = helper.GetHTTPResponse(req, &currentTrack)
-	if err != nil {
-		log.Fatal(err)
+	status, errorObj := helper.GetHTTPResponse(req, &currentTrack)
+	if status == "fail" {
+		c.AbortWithStatusJSON(errorObj.Status, errorObj)
 	}
 	c.IndentedJSON(200, currentTrack)
 	return currentTrack
@@ -66,9 +66,10 @@ func GetCurrentlyPlaying(c *gin.Context) {
 		log.Fatal(err)
 	}
 	var currentTrack models.GetCurrentlyPlayingResponse
-	_, err = helper.GetHTTPResponse(req, &currentTrack)
-	if err != nil {
-		log.Fatal(err)
+	status, errorObj := helper.GetHTTPResponse(req, &currentTrack)
+	if status == "fail" {
+		c.AbortWithStatusJSON(errorObj.Status, errorObj)
+		c.Abort()
 	}
 	c.IndentedJSON(200, currentTrack)
 }

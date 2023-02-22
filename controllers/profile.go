@@ -22,10 +22,10 @@ func GetProfile(c *gin.Context) {
 	}
 
 	var profile models.Profile
-	_, err = helper.GetHTTPResponse(req, &profile)
+	status, errorObj := helper.GetHTTPResponse(req, &profile)
 
-	if err != nil {
-		log.Fatal(err)
+	if status == "fail" {
+		c.AbortWithStatusJSON(errorObj.Status, errorObj)
 	}
 	fmt.Println("Current Profile: ", profile)
 	c.IndentedJSON(200, profile)

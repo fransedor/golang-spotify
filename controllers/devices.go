@@ -21,9 +21,9 @@ func GetAvailableDevices(c *gin.Context) {
 	}
 
 	var devices models.Devices
-	_, err = helper.GetHTTPResponse(req, &devices)
-	if err != nil {
-		log.Fatal(err)
+	status, errorObj := helper.GetHTTPResponse(req, &devices)
+	if status == "fail" {
+		c.AbortWithStatusJSON(errorObj.Status, errorObj)
 	}
 	fmt.Println("Available Devices: ", devices)
 	c.IndentedJSON(200, devices)

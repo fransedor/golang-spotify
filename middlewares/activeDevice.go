@@ -22,9 +22,10 @@ func GetActiveDevice(c *gin.Context) {
 	}
 
 	var devices models.Devices
-	_, err = helper.GetHTTPResponse(req, &devices)
-	if err != nil {
-		log.Fatal(err)
+	status, errorObj := helper.GetHTTPResponse(req, &devices)
+	if status == "fail" {
+		c.AbortWithStatusJSON(errorObj.Status, errorObj)
+		return
 	}
 
 	var hasActiveDevice bool = false
@@ -33,8 +34,7 @@ func GetActiveDevice(c *gin.Context) {
 	}
 	fmt.Println("Checking active device: ", hasActiveDevice)
 	if !hasActiveDevice {
-		c.IndentedJSON(400, helper.CreateErrorResponse(400, "Open your spotify player"))
-		c.Abort()
+		c.AbortWithStatusJSON(400, helper.CreateErrorResponse(400, "Open your spotify player"))
 	} else {
 		c.Next()
 	}
