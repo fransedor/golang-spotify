@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -39,6 +40,8 @@ func StartOrPausePlayback(c *gin.Context) {
 }
 
 func GetPlaybackState(c *gin.Context) models.GetCurrentlyPlayingResponse {
+	fmt.Println("Running GetPlaybackState")
+
 	authHeader := c.Request.Header.Get("Authorization")
 	spotifyURL := os.Getenv("SPOTIFY_URL")
 	req, err := helper.CreateHTTPRequestWithHeader("GET", spotifyURL+"/me/player", nil, authHeader[7:])
@@ -50,10 +53,12 @@ func GetPlaybackState(c *gin.Context) models.GetCurrentlyPlayingResponse {
 	if err != nil {
 		log.Fatal(err)
 	}
+	c.IndentedJSON(200, currentTrack)
 	return currentTrack
 }
 
 func GetCurrentlyPlaying(c *gin.Context) {
+	fmt.Println("Running GetCurrentlyPlaying")
 	authHeader := c.Request.Header.Get("Authorization")
 	spotifyURL := os.Getenv("SPOTIFY_URL")
 	req, err := helper.CreateHTTPRequestWithHeader("GET", spotifyURL+"/me/player/currently-playing", nil, authHeader[7:])

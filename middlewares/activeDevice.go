@@ -11,6 +11,7 @@ import (
 )
 
 func GetActiveDevice(c *gin.Context) {
+	fmt.Println("Running GetActiveDevice")
 	authHeader := c.Request.Header.Get("Authorization")
 
 	spotifyURL := os.Getenv("SPOTIFY_URL")
@@ -25,15 +26,14 @@ func GetActiveDevice(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	var hasActiveDevice bool = false
-	for _, device := range devices.Devices {
-		if device.Is_active {
-			hasActiveDevice = true
-		}
+	if len(devices.Devices) > 0 {
+		hasActiveDevice = true
 	}
 	fmt.Println("Checking active device: ", hasActiveDevice)
 	if !hasActiveDevice {
-		c.IndentedJSON(400, "error")
+		c.IndentedJSON(400, helper.CreateErrorResponse(400, "Open your spotify player"))
 		c.Abort()
 	} else {
 		c.Next()
